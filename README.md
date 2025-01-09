@@ -9,6 +9,7 @@ This is intended to be an example and Axway provides no support or guarantees. P
 It will generate a full report for the previous calendar 
 ## Axway documentation
 
+
 ### Axway Platform REST API specification
 https://platform.axway.com/api-docs.html
 
