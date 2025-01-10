@@ -40,7 +40,7 @@ def main():
     # Authenticate and generate report
     s, urlST = Authenticate('USER_GROUP')
 
-    response = requests.post(URL_TOKEN, data=data)
+    response = requests.post(URL_TOKEN, data=data, timeout=10)
     response.raise_for_status()  # Check for request errors
     token_payload = response.json()
 
@@ -53,7 +53,7 @@ def main():
 
     # Fetch usage data
     resource = 'usage/'
-    response = requests.get(URL + resource, headers=headers, params=params)
+    response = requests.get(URL + resource, headers=headers, params=params, timeout=10)
     response.raise_for_status()  # Check for request errors
     if response.ok:
         logging.info("Got current stats: %s", response.json())
@@ -73,18 +73,20 @@ def main():
 
     # Save report to file
     os.makedirs("Reports", exist_ok=True)
-    with open(f"Reports/{report_filename}", "w") as report:
+    with open(f"Reports/{report_filename}", "w", encoding="utf8") as report:
         json.dump(response.json(), report, indent=4)
 
     # Upload report
     resource = 'usage/'
     payload = {'uploadMethod': 'automatic'}
+    with open(f'Reports/{report_filename}', encoding="utf8") as my_report:
+        contents = my_report.read()
     files = [
-        ('file', (report_filename, open(f'Reports/{report_filename}', 'rb'), 'application/json'))
+        ('file', (report_filename, contents, 'application/json'))
     ]
     headers.pop('Content-Type', None)  # Remove Content-Type header for file upload
 
-    response = requests.post(URL + resource, headers=headers, data=payload, files=files)
+    response = requests.post(URL + resource, headers=headers, data=payload, files=files, timeout=10)
     if response.ok:
         logging.info("Successfully submitted report to the Axway Platform")
     else:
