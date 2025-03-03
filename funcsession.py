@@ -32,7 +32,7 @@ def Authenticate(env, add_headers=None):
     ST_url = "https://{}:{}/api/v{}/".format(ADMIN_HOST, ADMIN_PORT, API_VERSION)
     # This is needed to ignore the untrusted certificate warning
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    if ST_AUTH == "2" or ST_AUTH == "3" or ST_AUTH == "4":
+    if ST_AUTH in ('2', '3', '4'):
         CERT_FILE = config.get(env, "CERT_FILE")
         CERT_PWD = config.get(env, "CERT_PWD")
     # Now let's create the headers
@@ -47,7 +47,8 @@ def Authenticate(env, add_headers=None):
     if add_headers is not None:
         headers.update(add_headers)
 
-    # Let's get the cookie, so we do not have to authenticate with each request. Here we also remove the authentication
+    # Let's get the cookie, so we do not have to authenticate with each request. Here we also
+    # remove the authentication
     # from the headers because we no longer need it
     with session() as c:
         # Merge environment settings into session
@@ -59,7 +60,7 @@ def Authenticate(env, add_headers=None):
             if ST_AUTH == "1":
                 c.auth = (ADMIN_USER, ADMIN_PASS)
                 response = c.post(ST_url + "myself")
-            elif ST_AUTH == "2" or ST_AUTH == "4":
+            elif ST_AUTH in ('2', '4'):
                 c.mount(
                     ST_url,
                     Pkcs12Adapter(pkcs12_filename=CERT_FILE, pkcs12_password=CERT_PWD),
@@ -76,7 +77,7 @@ def Authenticate(env, add_headers=None):
                 c.headers.update({"csrfToken": response.headers["csrfToken"]})
             response.raise_for_status()
             debug = dump.dump_response(response)
-            logging.debug(debug.decode("utf-8"))
+            logging.debug(debug.decode())
         except requests.ConnectionError as e:
             logging.error(
                 "OOPS! Connection Error. You can't connect to "
@@ -85,22 +86,20 @@ def Authenticate(env, add_headers=None):
             )
             logging.error(str(e))
             # print(dump.dump_response(c))
-            raise SystemExit(e)
+            raise SystemExit(e) from e
         except requests.Timeout as e:
             logging.error("OOPS!! Timeout Error")
             logging.error(str(e))
-            raise SystemExit(e)
+            raise SystemExit(e) from e
         except requests.exceptions.HTTPError as e:
             logging.error("Authentication failed")
             print(e.response.text)
-            raise SystemExit(e)
+            raise SystemExit(e) from e
         except requests.RequestException as e:
             logging.error("OOPS!! General Error")
             logging.error(str(e))
-            raise SystemExit(e)
+            raise SystemExit(e) from e
         except KeyboardInterrupt:
             logging.error("Someone interrupted the application")
-        logging.info("Authentication to {} successful".format(ST_url))
+        logging.info(f"Authentication to {ST_url} successful")
     return c, ST_url
-
-
