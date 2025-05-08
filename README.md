@@ -10,7 +10,7 @@ It will generate a full report for the previous calendar month and submit it to 
 ## Configuration
 
 1. In the **/conf** directory, rename the file **sample.env** to **.env** and populate it with the Client ID and secret from the Axway Platform.
-2. In the **/conf** directory, rename the file **config-sample.ini** to **.config.ini** and Populate it with the Client ID and secret from the Axway Platform.
+2. In the **/conf** directory, rename the file **config-sample.ini** to **config.ini** and Populate it with the Client ID and secret from the Axway Platform.
 
 
 ## Axway documentation
